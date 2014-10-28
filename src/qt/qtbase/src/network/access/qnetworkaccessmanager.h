@@ -84,6 +84,7 @@ public:
         PutOperation,
         PostOperation,
         DeleteOperation,
+        PatchOperation,
         CustomOperation,
 
         UnknownOperation = 0
@@ -127,6 +128,9 @@ public:
     QNetworkReply *put(const QNetworkRequest &request, const QByteArray &data);
     QNetworkReply *put(const QNetworkRequest &request, QHttpMultiPart *multiPart);
     QNetworkReply *deleteResource(const QNetworkRequest &request);
+    QNetworkReply *patch(const QNetworkRequest &request, QIODevice *data);
+    QNetworkReply *patch(const QNetworkRequest &request, const QByteArray &data);
+    QNetworkReply *patch(const QNetworkRequest &request, QHttpMultiPart *multiPart);
     QNetworkReply *sendCustomRequest(const QNetworkRequest &request, const QByteArray &verb, QIODevice *data = 0);
 
 #ifndef QT_NO_BEARERMANAGEMENT

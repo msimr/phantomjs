@@ -72,6 +72,7 @@ public:
         Post,
         Put,
         Delete,
+        Patch,
         Trace,
         Connect,
         Custom

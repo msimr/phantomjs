@@ -705,6 +705,12 @@ void QNetworkReplyHttpImplPrivate::postRequest()
         httpRequest.setOperation(QHttpNetworkRequest::Delete);
         break;
 
+    case QNetworkAccessManager::PatchOperation:
+        invalidateCache();
+        httpRequest.setOperation(QHttpNetworkRequest::Patch);
+        createUploadByteDevice();
+        break;
+
     case QNetworkAccessManager::CustomOperation:
         invalidateCache(); // for safety reasons, we don't know what the operation does
         httpRequest.setOperation(QHttpNetworkRequest::Custom);

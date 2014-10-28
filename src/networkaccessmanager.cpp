@@ -66,6 +66,9 @@ static const char *toString(QNetworkAccessManager::Operation op)
     case QNetworkAccessManager::DeleteOperation:
         str = "DELETE";
         break;
+    case QNetworkAccessManager::PatchOperation:
+        str = "PATCH";
+        break;
     default:
         str = "?";
         break;
@@ -256,7 +259,7 @@ QNetworkReply *NetworkAccessManager::createRequest(Operation op, const QNetworkR
         if (outgoingData) postData = outgoingData->peek(MAX_REQUEST_POST_BODY_SIZE);
         QString contentType = req.header(QNetworkRequest::ContentTypeHeader).toString();
         if (contentType.isEmpty()) {
-            req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+            //req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
         }
     }
 

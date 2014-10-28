@@ -142,6 +142,9 @@ void QWebFrameAdapter::load(const QNetworkRequest& req, QNetworkAccessManager::O
     case QNetworkAccessManager::DeleteOperation:
         request.setHTTPMethod("DELETE");
         break;
+    case QNetworkAccessManager::PatchOperation:
+        request.setHTTPMethod("PATCH");
+        break;
     case QNetworkAccessManager::CustomOperation:
         request.setHTTPMethod(req.attribute(QNetworkRequest::CustomVerbAttribute).toByteArray().constData());
         break;

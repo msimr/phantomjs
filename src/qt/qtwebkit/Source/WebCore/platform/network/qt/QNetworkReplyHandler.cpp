@@ -428,6 +428,8 @@ String QNetworkReplyHandler::httpMethod() const
         return "PUT";
     case QNetworkAccessManager::DeleteOperation:
         return "DELETE";
+    case QNetworkAccessManager::PatchOperation:
+        return "PATCH";
     case QNetworkAccessManager::CustomOperation:
         return m_resourceHandle->firstRequest().httpMethod();
     default:
@@ -455,6 +457,8 @@ QNetworkReplyHandler::QNetworkReplyHandler(ResourceHandle* handle, LoadType load
         m_method = QNetworkAccessManager::PutOperation;
     else if (r.httpMethod() == "DELETE")
         m_method = QNetworkAccessManager::DeleteOperation;
+    else if (r.httpMethod() == "PATCH")
+        m_method = QNetworkAccessManager::PatchOperation;
     else
         m_method = QNetworkAccessManager::CustomOperation;
 
@@ -742,7 +746,7 @@ QNetworkReply* QNetworkReplyHandler::sendNetworkRequest(QNetworkAccessManager* m
     // Post requests on files and data don't really make sense, but for
     // fast/forms/form-post-urlencoded.html and for fast/forms/button-state-restore.html
     // we still need to retrieve the file/data, which means we map it to a Get instead.
-    if (m_method == QNetworkAccessManager::PostOperation
+    if (m_method == QNetworkAccessManager::PostOperation && m_method != QNetworkAccessManager::PatchOperation
         && (!url.toLocalFile().isEmpty() || url.scheme() == QLatin1String("data")))
         m_method = QNetworkAccessManager::GetOperation;
 
@@ -768,6 +772,15 @@ QNetworkReply* QNetworkReplyHandler::sendNetworkRequest(QNetworkAccessManager* m
         case QNetworkAccessManager::DeleteOperation: {
             clearContentHeaders();
             return manager->deleteResource(m_request);
+        }
+        case QNetworkAccessManager::PatchOperation: {
+            FormDataIODevice* patchDevice = getIODevice(request);
+            // We may be uploading files so prevent QNR from buffering data
+            m_request.setHeader(QNetworkRequest::ContentLengthHeader, patchDevice->getFormDataSize());
+            m_request.setAttribute(QNetworkRequest::DoNotBufferUploadDataAttribute, QVariant(true));
+            QNetworkReply* result = manager->patch(m_request, patchDevice);
+            patchDevice->setParent(result);
+            return result;
         }
         case QNetworkAccessManager::CustomOperation: {
             FormDataIODevice* customDevice = getIODevice(request);
