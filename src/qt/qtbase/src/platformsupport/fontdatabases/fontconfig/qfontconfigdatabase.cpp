@@ -661,6 +661,7 @@ QFontEngine *QFontconfigDatabase::fontEngine(const QByteArray &fontData, qreal p
 {
     QFontEngine *e = QBasicFontDatabase::fontEngine(fontData, pixelSize, hintingPreference); // function may return NULL (0)
     if(e == 0)return 0;
+    QFontEngineFT *engine = static_cast<QFontEngineFT*>(e);
     QFontDef fontDef = engine->fontDef;
 
     QFontEngineFT::GlyphFormat format;
