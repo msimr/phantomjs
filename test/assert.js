@@ -12,9 +12,7 @@ function resetExitTimer() {
     }, timeout * 1000);
 }
 
-function showError(actual, expected) {
-    console.error('AssertionError: expected',  actual, 'to be', expected);
-
+function showError() {
     // Get the stack trace by throwing an exception and catching it.
     try {
         throw new Error();
@@ -29,10 +27,23 @@ function showError(actual, expected) {
     }
 }
 
+function showErrorEqual(actual, expected) {
+    console.error('AssertionError: expected',  actual, 'to be', expected);
+
+    showError();
+}
+
+function showErrorNotEqual(actual, expected) {
+    console.error('AssertionError: expected',  actual,
+        'to be different than', expected);
+
+    showError();
+}
+
 function isTrue(value) {
     resetExitTimer();
     if (!value) {
-        showError(value, true);
+        showErrorEqual(value, true);
     }
     ++total;
 }
@@ -40,7 +51,25 @@ function isTrue(value) {
 function equal(actual, expected) {
     resetExitTimer();
     if (actual != expected) {
-        showError(actual, expected);
+        showErrorEqual(actual, expected);
+    }
+    ++total;
+}
+
+function jsonEqual(actual, expected) {
+    resetExitTimer();
+    var actualJson = JSON.stringify(actual);
+    var expectedJson = JSON.stringify(expected);
+    if (actualJson != expectedJson) {
+        showErrorEqual(actualJson, expectedJson);
+    }
+    ++total;
+}
+
+function notEqual(actual, expected) {
+    resetExitTimer();
+    if (actual == expected) {
+        showErrorNotEqual(actual, expected);
     }
     ++total;
 }
@@ -48,7 +77,7 @@ function equal(actual, expected) {
 function strictEqual(actual, expected) {
     resetExitTimer();
     if (actual !== expected) {
-        showError(actual, expected);
+        showErrorEqual(actual, expected);
     }
     ++total;
 }
@@ -56,13 +85,42 @@ function strictEqual(actual, expected) {
 function typeOf(object, expected) {
     resetExitTimer();
     if (typeof object !== expected) {
-        showError(typeof object, expected);
+        showErrorEqual(typeof object, expected);
     }
     ++total;
+}
+
+function waitFor(condition, callback, options) {
+    callback = callback || function() {};
+    options = options || {};
+    var poolMs = options.poolMs || 10;
+    var timeoutMs = options.timeoutMs || 1000;
+    var cutoffMs = timeoutMs + new Date().getTime();
+
+    var waitForInternal = function () {
+        if (condition()) {
+            ++total;
+            callback();
+        } else {
+            var now = new Date().getTime();
+            if (now < cutoffMs) {
+                window.setTimeout(waitForInternal, poolMs);
+            } else {
+                console.error("Timeout while waiting for ''",
+                    condition.toString(), "'");
+                showError();
+            }
+        }
+    }
+
+    waitForInternal();
 }
 
 exports.timeout = timeout;
 exports.isTrue = isTrue;
 exports.equal = equal;
+exports.jsonEqual = jsonEqual;
+exports.notEqual = notEqual;
 exports.strictEqual = strictEqual;
 exports.typeOf = typeOf;
+exports.waitFor = waitFor;

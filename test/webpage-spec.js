@@ -1,268 +1,5 @@
-function checkClipRect(page, clipRect) {
-    it("should have clipRect with height "+clipRect.height, function () {
-        expect(page.clipRect.height).toEqual(clipRect.height);
-    });
-    it("should have clipRect with left "+clipRect.left, function () {
-        expect(page.clipRect.left).toEqual(clipRect.left);
-    });
-    it("should have clipRect with top "+clipRect.top, function () {
-        expect(page.clipRect.top).toEqual(clipRect.top);
-    });
-    it("should have clipRect with width "+clipRect.width, function () {
-        expect(page.clipRect.width).toEqual(clipRect.width);
-    });
-}
-
-function checkScrollPosition(page, scrollPosition) {
-    it("should have scrollPosition with left "+scrollPosition.left, function () {
-        expect(page.scrollPosition.left).toEqual(scrollPosition.left);
-    });
-    it("should have scrollPosition with top "+scrollPosition.top, function () {
-        expect(page.scrollPosition.top).toEqual(scrollPosition.top);
-    });
-}
-
-function checkViewportSize(page, viewportSize) {
-    it("should have viewportSize with height "+viewportSize.height, function () {
-        expect(page.viewportSize.height).toEqual(viewportSize.height);
-    });
-    it("should have viewportSize with width "+viewportSize.width, function () {
-        expect(page.viewportSize.width).toEqual(viewportSize.width);
-    });
-}
-
-function checkPageCallback(page) {
-    it("should pass variables from/to window.callPhantom/page.onCallback", function() {
-        var msgA = "a",
-            msgB = "b",
-            result,
-            expected = msgA + msgB;
-        page.onCallback = function(a, b) {
-            return a + b;
-        };
-        result = page.evaluate(function(a, b) {
-            return callPhantom(a, b);
-        }, msgA, msgB);
-
-        expect(result).toEqual(expected);
-    });
-}
-
-function checkPageConfirm(page) {
-    it("should pass result from/to window.confirm/page.onConfirm", function() {
-        var msg = "message body",
-            result,
-            expected = true;
-        page.onConfirm = function(msg) {
-            return true;
-        };
-        result = page.evaluate(function(m) {
-            return window.confirm(m);
-        }, msg);
-
-        expect(result).toEqual(expected);
-    });
-}
-
-function checkPagePrompt(page) {
-    it("should pass result from/to window.prompt/page.onPrompt", function() {
-        var msg = "message",
-            value = "value",
-            result,
-            expected = "extra-value";
-        page.onPrompt = function(msg, value) {
-            return "extra-"+value;
-        };
-        result = page.evaluate(function(m, v) {
-            return window.prompt(m, v);
-        }, msg, value);
-
-        expect(result).toEqual(expected);
-    });
-}
-
-describe("WebPage constructor", function() {
-    it("should exist in window", function() {
-        expect(window.hasOwnProperty('WebPage')).toBeTruthy();
-    });
-
-    it("should be a function", function() {
-        expect(typeof window.WebPage).toEqual('function');
-    });
-});
-
 describe("WebPage object", function() {
     var page = new WebPage();
-
-    it("should be creatable", function() {
-        expect(typeof page).toEqual('object');
-        expect(page).toNotEqual(null);
-    });
-
-    it("should be able to get any signal handler that are currently set on it", function() {
-        page.onInitialized = undefined;
-        expect(page.onInitialized).toBeUndefined();
-        var onInitialized1 = function() { var x = "x"; };
-        page.onInitialized = onInitialized1;
-        expect(page.onInitialized).toEqual(onInitialized1);
-        var onInitialized2 = function() { var y = "y"; };
-        page.onInitialized = onInitialized2;
-        expect(page.onInitialized).toEqual(onInitialized2);
-        expect(page.onInitialized).toNotEqual(onInitialized1);
-        page.onInitialized = null;
-        // Will only allow setting to a function value, so setting it to `null` returns `undefined`
-        expect(page.onInitialized).toBeUndefined();
-        page.onInitialized = undefined;
-        expect(page.onInitialized).toBeUndefined();
-    });
-
-    it("should be able to get any callback handler that are currently set on it", function() {
-        page.onConfirm = undefined;
-        expect(page.onConfirm).toBeUndefined();
-        var onConfirmFunc1 = function() { return !"x"; };
-        page.onConfirm = onConfirmFunc1;
-        expect(page.onConfirm).toEqual(onConfirmFunc1);
-        var onConfirmFunc2 = function() { return !!"y"; };
-        page.onConfirm = onConfirmFunc2;
-        expect(page.onConfirm).toEqual(onConfirmFunc2);
-        expect(page.onConfirm).toNotEqual(onConfirmFunc1);
-        page.onConfirm = null;
-        // Will only allow setting to a function value, so setting it to `null` returns `undefined`
-        expect(page.onConfirm).toBeUndefined();
-        page.onConfirm = undefined;
-        expect(page.onConfirm).toBeUndefined();
-    });
-
-    it("should be able to get the error signal handler that is currently set on it (currently a special 1-off case)", function() {
-        page.onError = undefined;
-        expect(page.onError).toBeUndefined();
-        var onErrorFunc1 = function() { return !"x"; };
-        page.onError = onErrorFunc1;
-        expect(page.onError).toEqual(onErrorFunc1);
-        var onErrorFunc2 = function() { return !!"y"; };
-        page.onError = onErrorFunc2;
-        expect(page.onError).toEqual(onErrorFunc2);
-        expect(page.onError).toNotEqual(onErrorFunc1);
-        page.onError = null;
-        // Will only allow setting to a function value, so setting it to `null` returns `undefined`
-        expect(page.onError).toBeUndefined();
-        page.onError = undefined;
-        expect(page.onError).toBeUndefined();
-    });
-
-    checkPageCallback(page);
-    checkPageConfirm(page);
-    checkPagePrompt(page);
-
-    checkClipRect(page, {height:0,left:0,top:0,width:0});
-
-    it("should have objectName as 'WebPage'", function() {
-        expect(page.objectName).toEqual('WebPage');
-    });
-
-    it("should have paperSize as an empty object", function() {
-        expect(page.paperSize).toEqual({});
-    });
-
-    checkScrollPosition(page, {left:0,top:0});
-
-    it("should have non-empty settings", function() {
-        expect(page.settings).toNotEqual(null);
-        expect(page.settings).toNotEqual({});
-    });
-
-    checkViewportSize(page, {height:300,width:400});
-
-    it("should handle click event", function() {
-        runs(function() {
-            page.evaluate(function() {
-                window.addEventListener('mousedown', function(event) {
-                    window.loggedEvent = window.loggedEvent || {};
-                    window.loggedEvent.mousedown = event;
-                }, false);
-                window.addEventListener('mouseup', function(event) {
-                    window.loggedEvent = window.loggedEvent || {};
-                    window.loggedEvent.mouseup = event;
-                }, false);
-            });
-            page.sendEvent('click', 42, 217);
-        });
-
-        waits(50);
-
-        runs(function() {
-            var event = page.evaluate(function() {
-                return window.loggedEvent;
-            });
-            expect(event.mouseup.clientX).toEqual(42);
-            expect(event.mouseup.clientY).toEqual(217);
-            expect(event.mousedown.clientX).toEqual(42);
-            expect(event.mousedown.clientY).toEqual(217);
-        });
-    });
-
-    it("should handle doubleclick event", function () {
-        runs(function () {
-            page.content = '<input id="doubleClickField" type="text" onclick="document.getElementById(\'doubleClickField\').value=\'clicked\';" ondblclick="document.getElementById(\'doubleClickField\').value=\'doubleclicked\';" oncontextmenu="document.getElementById(\'doubleClickField\').value=\'rightclicked\'; return false;" value="hello"/>';
-            var point = page.evaluate(function () {
-                var el = document.querySelector('input');
-                var rect = el.getBoundingClientRect();
-                return { x: rect.left + Math.floor(rect.width / 2), y: rect.top + (rect.height / 2) };
-            });
-            page.sendEvent('doubleclick', point.x, point.y);
-        });
-
-        waits(50);
-
-        runs(function () {
-            var text = page.evaluate(function () {
-                return document.querySelector('input').value;
-            });
-            expect(text).toEqual("doubleclicked");
-        });
-    });
-
-    it("should handle click with modifier keys", function() {
-        runs(function() {
-            page.evaluate(function() {
-                window.addEventListener('click', function(event) {
-                    window.loggedEvent = window.loggedEvent || {};
-                    window.loggedEvent.click = event;
-                }, false);
-            });
-            page.sendEvent('click', 100, 100, 'left', page.event.modifier.shift);
-        });
-
-        waits(50);
-
-        runs(function() {
-            var event = page.evaluate(function() {
-                return window.loggedEvent.click;
-            });
-            expect(event.shiftKey).toEqual(true);
-        });
-    });
-
-    it("should handle doubleclick with modifier keys", function() {
-        runs(function() {
-            page.evaluate(function() {
-                window.addEventListener('dblclick', function(event) {
-                    window.loggedEvent = window.loggedEvent || {};
-                    window.loggedEvent.dblclick = event;
-                }, false);
-            });
-            page.sendEvent('doubleclick', 100, 100, 'left', page.event.modifier.shift);
-        });
-
-        waits(50);
-
-        runs(function() {
-            var event = page.evaluate(function() {
-                return window.loggedEvent.dblclick;
-            });
-            expect(event.shiftKey).toEqual(true);
-        });
-    });
 
     xit("should handle file uploads", function() {
         runs(function() {
@@ -299,78 +36,6 @@ describe("WebPage object", function() {
             expect(files.length).toEqual(2)
             expect(files.fileNames[0]).toEqual("run-tests.js");
             expect(files.fileNames[1]).toEqual("webpage-spec.js");
-        });
-    });
-
-    it("reports unhandled errors", function() {
-        var lastError = null;
-
-        var page = new require('webpage').create();
-        page.onError = function(message) { lastError = message; };
-
-        runs(function() {
-            page.evaluate(function() {
-                setTimeout(function() { referenceError(); }, 0);
-            });
-        });
-
-        waits(0);
-
-        runs(function() {
-            expect(lastError).toEqual("ReferenceError: Can't find variable: referenceError");
-
-            page.evaluate(function() { referenceError2(); });
-            expect(lastError).toEqual("ReferenceError: Can't find variable: referenceError2");
-
-            page.evaluate(function() { throw "foo"; });
-            expect(lastError).toEqual("foo");
-
-            page.evaluate(function() { throw Error("foo"); });
-            expect(lastError).toEqual("Error: foo");
-        });
-    });
-
-    it("doesn't report handled errors", function() {
-        var hadError    = false;
-        var caughtError = false;
-        var page        = require('webpage').create();
-
-        runs(function() {
-            page.onError = function() { hadError = true; };
-            page.evaluate(function() {
-                caughtError = false;
-
-                try {
-                    referenceError();
-                } catch(e) {
-                    caughtError = true;
-                }
-            });
-
-            expect(hadError).toEqual(false);
-            expect(page.evaluate(function() { return caughtError; })).toEqual(true);
-        });
-    });
-
-    it("reports the sourceURL and line of errors", function() {
-        runs(function() {
-            var e1, e2;
-
-            try {
-                referenceError();
-            } catch (e) {
-                e1 = e;
-            }
-
-            try {
-                referenceError();
-            } catch (e) {
-                e2 = e;
-            }
-
-            expect(e1.sourceURL).toMatch(/webpage-spec.js$/);
-            expect(e1.line).toBeGreaterThan(1);
-            expect(e2.line).toEqual(e1.line + 6);
         });
     });
 
@@ -411,22 +76,6 @@ describe("WebPage object", function() {
             expect(stack[0].file).toEqual("./fixtures/error-helper.js");
             expect(stack[0].line).toEqual(7);
             expect(stack[0]["function"]).toEqual("bar");
-        });
-    });
-
-    it("reports errors that occur in the main context", function() {
-        var error;
-        phantom.onError = function(e) { error = e; };
-
-        runs(function() {
-            setTimeout(function() { zomg(); }, 0);
-        });
-
-        waits(0);
-
-        runs(function() {
-            expect(error.toString()).toEqual("ReferenceError: Can't find variable: zomg");
-            phantom.onError = phantom.defaultErrorHandler;
         });
     });
 
@@ -723,65 +372,6 @@ describe("WebPage object", function() {
         });
     });
 
-    it("should pass variables to functions properly", function() {
-        var testPrimitiveArgs = function() {
-            var samples = [
-                true,
-                0,
-                "`~!@#$%^&*()_+-=[]\\{}|;':\",./<>?",
-                undefined,
-                null
-            ];
-            for (var i = 0; i < samples.length; i++) {
-                if (samples[i] !== arguments[i]) {
-                    console.log("FAIL");
-                }
-            }
-        };
-
-        var testComplexArgs = function() {
-            var samples = [
-                {a:true, b:0, c:"string"},
-                function() { return true; },
-                [true, 0, "string"],
-                /\d+\w*\//
-            ];
-            for (var i = 0; i < samples.length; i++) {
-                if (typeof samples[i] !== typeof arguments[i] ||
-                    samples[i].toString() !== arguments[i].toString()) {
-                    console.log("FAIL");
-                }
-            }
-        };
-
-        var message;
-        runs(function() {
-            page.onConsoleMessage = function (msg) {
-                message = msg;
-            };
-        });
-
-        waits(0);
-
-        runs(function() {
-            page.evaluate(function() {
-                console.log("PASS");
-            });
-            page.evaluate(testPrimitiveArgs,
-                true,
-                0,
-                "`~!@#$%^&*()_+-=[]\\{}|;':\",./<>?",
-                undefined,
-                null);
-            page.evaluate(testComplexArgs,
-                {a:true, b:0, c:"string"},
-                function() { return true; },
-                [true, 0, "string"],
-                /\d+\w*\//);
-            expect(message).toEqual("PASS");
-        });
-    });
-
     it('should open url using secure connection', function() {
         var page = require('webpage').create();
         var url = 'https://httpbin.org/';
@@ -859,18 +449,6 @@ describe("WebPage construction with options", function () {
         expect(page).toNotEqual(null);
     });
 
-    describe("specifying clipRect", function() {
-        var opts = {
-            clipRect: {
-                height: 100,
-                left: 10,
-                top: 20,
-                width: 200
-            }
-        };
-        checkClipRect(new WebPage(opts), opts.clipRect);
-    });
-
     describe("specifying onConsoleMessage", function() {
         var message = false,
             opts = {
@@ -929,16 +507,6 @@ describe("WebPage construction with options", function () {
         });
     });
 
-    describe("specifying scrollPosition", function () {
-        var opts = {
-            scrollPosition: {
-                left: 1,
-                top: 2
-            }
-        };
-        checkScrollPosition(new WebPage(opts), opts.scrollPosition);
-    });
-
     describe("specifying timeout", function () {
         var opts = {
             settings: {
@@ -949,16 +517,6 @@ describe("WebPage construction with options", function () {
         it("should have timeout as "+opts.settings.timeout,function () {
             expect(page.settings.timeout).toEqual(opts.settings.timeout);
         });
-    });
-
-    describe("specifying viewportSize", function () {
-        var opts = {
-            viewportSize: {
-                height: 100,
-                width: 200
-            }
-        };
-        checkViewportSize(new WebPage(opts), opts.viewportSize);
     });
 });
 
@@ -1558,4 +1116,3 @@ describe("WebPage render image", function(){
         p.close();
     });
 });
-

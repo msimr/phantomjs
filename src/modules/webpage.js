@@ -370,8 +370,10 @@ function decorateNewPage(opts, page) {
             switch (argType) {
             case "object":      //< for type "object"
             case "array":       //< for type "array"
+                str += JSON.stringify(arg) + ","
+                break;
             case "date":        //< for type "date"
-                str += "JSON.parse(" + JSON.stringify(JSON.stringify(arg)) + "),"
+                str += "new Date(" + JSON.stringify(arg) + "),"
                 break;
             case "string":      //< for type "string"
                 str += quoteString(arg) + ',';
